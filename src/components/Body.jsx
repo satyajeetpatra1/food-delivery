@@ -1,6 +1,7 @@
 import axios from "axios";
 import RestaurantCard from "./RestaurantCard";
 import { useEffect, useState } from "react";
+import Search from "./Search";
 
 function Body() {
   const [allRestaurants, setAllRestaurants] = useState([]);
@@ -18,20 +19,68 @@ function Body() {
     calling();
   }, []);
 
+  const [filteredRestaurant, setFilteredRestaurant] = useState(allRestaurants);
+
+  const [buttonClicked, setButtonClicked] = useState("");
+
+  useEffect(() => {
+    if (allRestaurants && allRestaurants.length) {
+      if (buttonClicked === "filter") {
+        setFilteredRestaurant(
+          allRestaurants.filter(
+            (restaurant) => restaurant.info.avgRating >= 4.2
+          )
+        );
+      } else {
+        setFilteredRestaurant(allRestaurants);
+      }
+    }
+  }, [allRestaurants]);
+
+  function handleTopRestaurant() {
+    setFilteredRestaurant(
+      allRestaurants.filter((restaurant) => restaurant.info.avgRating >= 4.4)
+    );
+    setButtonClicked("rating");
+  }
+
+  function handleReset() {
+    setFilteredRestaurant(allRestaurants);
+    setButtonClicked("reset");
+  }
+
   return (
     <div>
       <h1 className="font-bold text-2xl m-8">
         Restaurants with online food delivery in Chhindwara
       </h1>
-      <button className="border rounded-2xl ml-20 w-1/12 p-2 text-xl">
+      <button
+        className={`${
+          buttonClicked === "rating" ? "bg-yellow-200" : ""
+        } border rounded-2xl ml-20 w-1/12 p-2 text-xl cursor-pointer`}
+        onClick={handleTopRestaurant}
+      >
         Rating 4.4+
       </button>
-      <button className="border rounded-2xl ml-2 w-1/12 p-2 text-xl">
+      <button
+        className={`${
+          buttonClicked === "reset" ? "bg-yellow-200" : ""
+        } border rounded-2xl ml-2 w-1/12 p-2 text-xl cursor-pointer`}
+        onClick={handleReset}
+      >
         Reset
       </button>
 
+      <div>
+        <Search
+          setFilteredRestaurant={setFilteredRestaurant}
+          allRestaurants={allRestaurants}
+          setButtonClicked={setButtonClicked}
+        />
+      </div>
+
       <div className="flex flex-wrap w-10/12 mx-auto">
-        {allRestaurants.map((item, index) => (
+        {filteredRestaurant.map((item, index) => (
           <RestaurantCard item={item} key={index} />
         ))}
       </div>
